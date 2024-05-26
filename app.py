@@ -1,7 +1,7 @@
 from flask import Flask, render_template, jsonify, request, session, redirect, url_for
 import requests
 
-from model import db, Users
+from model import db, Users, Recipes
 from data import diets, cuisines, intolerances
 
 
@@ -24,7 +24,7 @@ SPOONACULAR_API_KEY = "c79bb480382d4aebb082c523481588ee"
 # Spoonacular API endpoints
 RANDOM_RECIPE_URL = f"https://api.spoonacular.com/recipes/random?apiKey={SPOONACULAR_API_KEY}"
 SEARCH_RECIPES_URL = f"https://api.spoonacular.com/recipes/complexSearch?apiKey={SPOONACULAR_API_KEY}"
-FETCH_RECIPES_URL = f"https://api.spoonacular.com/recipes/{id}/information?apiKey={SPOONACULAR_API_KEY}"
+
 
 # Helper functions for Spoonacular API
 def fetch_random_recipe():
@@ -38,42 +38,17 @@ def search_recipes(query,cuisine,diet,intolerance):
     return data['results'] if 'results' in data else []
 
 def fetch_recipe_by_id(recipe_id):
+    try:
     # Construct the URL to fetch details of a specific recipe by ID
-    url = f"https://api.spoonacular.com/recipes/{recipe_id}/information?apiKey={SPOONACULAR_API_KEY}"
-    print(url)
-    # Make the GET request
-    response = requests.get(url)
-    print(response.status_code)
-    recipe_data = response.json()
-    
-
-        # Extract the relevant details of the recipe
-    recipe_title = recipe_data['title']
-    recipe_instructions = recipe_data['instructions']
-        # You can extract more details as needed
-
-        # Return the recipe details as a dictionary
-    return {
-        'title': recipe_title,
-        'instructions': recipe_instructions,
-            # Add more fields here based on your requirements
-        }
-
-  
-@app.route('/search/<int:recipe_id>')
-def recipe_details(recipe_id):
-    if 'username' in session:
-        # Fetch recipe details by ID using the defined function
-        recipe = fetch_recipe_by_id(recipe_id)
-        
-        if recipe:
-            return render_template('recipe.html', recipe=recipe)
-   
-    else:
-        # Redirect to home page if user is not logged in
-        return redirect(url_for('home'))
-
-
+        url = f"https://api.spoonacular.com/recipes/{recipe_id}/information?apiKey={SPOONACULAR_API_KEY}"
+        # Make the GET request
+        response = requests.get(url)
+        print(url) 
+        data = response.json()
+        return data
+    except KeyError as e:
+        print(f"{e}")
+        return None
 
 # Home page
 @app.route('/')
@@ -133,7 +108,7 @@ def logout():
     session.pop('username', None)
     return redirect(url_for('home_page'))
 
-@app.route('/random_recipe', methods=['GET'])
+@app.route('/random_recipe')
 def random_recipe():
     if 'username' in session:
         recipe = fetch_random_recipe()
@@ -158,6 +133,19 @@ def search():
      return render_template('search.html', username=session['username'], cuisines=cuisines, diets=diets, 
                                    intolerances=intolerances)
 
+@app.route('/search/<int:recipe_id>')
+def recipe_details(recipe_id):
+    if 'username' in session:
+        # Fetch recipe details by ID using the defined function
+        recipe = fetch_recipe_by_id(recipe_id)
+        
+        
+        return render_template('recipe.html', recipe=recipe)
+   
+   
+        # Redirect to home page if user is not logged in
+    return redirect(url_for('home_page'))
+
 @app.route('/refresh_recipe')
 def refresh_recipe():
     if 'username' in session:
@@ -165,10 +153,12 @@ def refresh_recipe():
         recipe = fetch_random_recipe()
     return render_template('recipe.html', username=session['username'], recipe=recipe)
 
+@app.route('/my_recipe')
+def my_recipe_page():
 
 # Save recipe route
-@app.route('/save_recipe', methods=['POST'])
-def save_recipe():
+@app.route('/like_recipe', methods=['POST'])
+def like_recipe():
     if 'username' in session:
         username = session['username']
         recipe = request.form['recipe']

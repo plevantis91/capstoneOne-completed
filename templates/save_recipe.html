@@ -7,7 +7,7 @@
 {% block content %}
 <div class="container mt-5">
     <h2>Save Recipe</h2>
-    <form method="POST" action="{{ url_for('save_recipe') }}">
+    <form method="GET" action="{{ url_for('save_recipe') }}">
         <div class="form-group">
             <label for="recipe">Recipe:</label>
             <textarea class="form-control" id="recipe" name="recipe" rows="5" placeholder="Enter the recipe details"></textarea>

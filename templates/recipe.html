@@ -23,9 +23,14 @@
             </ul>
             <h3>Instructions:</h3>
             <ol>
-                {% for step in recipe.analyzedInstructions[0].steps %}
+                {% if recipe[analyzedInstructions] and recipe[analyzedInstruction][0].steps %}
+                    {% for step in recipe[analyzedInstructions][0].steps | default('No instruction available') %}
                     <li>{{ step.step }}</li>
-                {% endfor %}
+                    {% endfor %}
+                   {% else %} 
+                   <li>No Instructions available </li>
+                {% endif %}
+
             </ol>
     
         </div>
