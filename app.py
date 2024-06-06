@@ -1,4 +1,4 @@
-from flask import Flask, render_template, jsonify, request, session, redirect, url_for
+from flask import Flask, render_template, jsonify, request, session, redirect, url_for, json
 import requests
 
 from model import db, Users, Recipes
@@ -153,29 +153,72 @@ def refresh_recipe():
         recipe = fetch_random_recipe()
     return render_template('recipe.html', username=session['username'], recipe=recipe)
 
-@app.route('/my_recipe')
-def my_recipe_page():
-
 # Save recipe route
 @app.route('/like_recipe', methods=['POST'])
 def like_recipe():
     if 'username' in session:
         username = session['username']
-        recipe = request.form['recipe']
-        user = Users.query.filter_by(username=username).first()
-
-        if user:
-            user.liked_recipes = user.liked_recipes + '\n' + recipe if user.liked_recipes else recipe
+        data = json.loads(request.data.decode('utf-8'))
+        recipe_data = data.get('data')
+        
+        if recipe_data:
+            like_recipe = Recipes(
+                title=recipe_data['title'],
+                description=recipe_data.get('summary', ''),  
+                image=recipe_data.get('image'),
+                recipe_id=recipe_data.get('id') 
+            )
+            db.session.add(like_recipe)
             db.session.commit()
-            return jsonify({'message': 'Recipe saved successfully'})
 
-    return jsonify({'error': 'User not logged in'})
-
-
+            return jsonify({
+                'id': like_recipe.id,
+                'title': like_recipe.title,
+                'description': like_recipe.description  
+            })
+        else:
+            return jsonify({'error': 'Invalid data format'}), 400
+    else:
+        return jsonify({'error': 'Unauthorized'}), 401
     
+# Liked recipes route
+@app.route('/liked_recipes', methods=['GET'])
+def liked_recipes():
+    if 'username' in session:
+        username = session['username']
+        user = Users.query.filter_by(username=username).first()
+        
+        if user:
+            liked_recipes = user.liked_recipes
+            recipes_data = [{'title': recipe.title, 'description': recipe.description, 'image': recipe.image} for recipe in liked_recipes]
+            return jsonify(recipes_data)
+        else:
+            return jsonify({'error': 'User not found'}), 404
+    else:
+        return jsonify({'error': 'Unauthorized'}), 401
 
-# Other routes for user authentication (login, register, logout) will be added here
-
+#Delete recipe route
+@app.route('/delete_recipe', methods=['POST'])
+def delete_recipe():
+    if 'username' in session:
+        username = session['username']
+        data = request.get_json()
+        recipe_id = data.get('id')
+        
+        if recipe_id:
+            recipe = Recipes.query.get(recipe_id)
+            if recipe:
+                db.session.delete(recipe)
+                db.session.commit()
+                return jsonify({'success': True})
+            else:
+                return jsonify({'error': 'Recipe not found'}), 404
+        else:
+            return jsonify({'error': 'Invalid data format'}), 400
+    else:
+        return jsonify({'error': 'Unauthorized'}), 401
+    
+# Run the Flask app
 if __name__ == '__main__':
     app.run(debug=True)
 

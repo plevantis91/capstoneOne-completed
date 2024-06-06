@@ -1,49 +1,70 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}My App{% endblock %}</title>
-    <!-- Bootstrap CSS link -->
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-</head>
-<body>
-    <div class="container">
-        <nav class="navbar navbar-expand-lg navbar-light bg-light">
-            <a class="navbar-brand" href="#">Recipe App</a>
-            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav">
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('home_page') }}">Home</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('random_recipe') }}">Random Recipe</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('search') }}">Search Recipes</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('save_recipe') }}">Saved Recipes</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('logout') }}">Logout</a>
-                    </li>
-                </ul>
-            </div>
-        </nav>
+<!-- home.html -->
+
+{% extends 'base.html' %}
+
+{% block title %}Login Page{% endblock %}
+
+{% block content %}
         <div class="mt-4">
             <h1>Welcome, {{ username }}</h1>
             <p>Explore recipes and enjoy!</p>
         </div>
-        {% block content %}{% endblock %}
-    </div>
+        <h1>Liked Recipes</h1>
+    <table id="recipesTable" class="table table-striped table-bordered">
+        <thead class="thead dark">
+            <tr>
+                <th>Title</th>
+                <th>Description</th>
+                <th>Image</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Rows will be inserted here by JavaScript -->
+        </tbody>
+    </table>
 
-    <!-- Bootstrap JS and dependencies (jQuery, Popper.js) -->
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-</body>
-</html>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+    axios.get('/liked_recipes')
+        .then(response => {
+            const recipes = response.data;
+            const tableBody = document.getElementById('recipesTable').querySelector('tbody');
+            
+            recipes.forEach(recipe => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${recipe.title}</td>
+                    <td>${recipe.description || ''}</td>
+                    <td><img src="${recipe.image || ''}" alt="${recipe.title}" style="max-width: 100px;"></td>
+                    <td><button class="delete-btn" data-id="${recipe.id}">Delete</button></td>
+                `;
+                tableBody.appendChild(row);
+            });
+
+            // Add event listeners to delete buttons
+            document.querySelectorAll('.delete-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    const recipeId = this.getAttribute('data-id');
+                    axios.post('/delete_recipe', { id: recipeId })
+                        .then(response => {
+                            if (response.data.success) {
+                                this.closest('tr').remove();
+                            } else {
+                                alert('Error deleting recipe');
+                            }
+                        })
+                        .catch(error => {
+                            console.error('There was an error deleting the recipe:', error);
+                        });
+                });
+            });
+        })
+        .catch(error => {
+            console.error('Error fetching liked recipes:', error);
+        });
+});
+
+    </script>
+
+{% endblock %}

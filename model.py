@@ -2,32 +2,42 @@ from flask_sqlalchemy import SQLAlchemy
 
 db = SQLAlchemy()
 
+class User_recipe(db.Model):
+    __tablename__ = 'user_recipe'
+    
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
+    recipe_id = db.Column(db.Integer, db.ForeignKey('recipes.id'), primary_key=True) 
 class Users(db.Model):
+    __tablename__ = 'users'
+
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(50), unique=True, nullable=False)
     password = db.Column(db.String(100), nullable=False)
-    liked_recipes = db.Column(db.Text)
-
+    
     # Define relationship with Recipe table
-    recipes = db.relationship('Recipes', backref='users', lazy=True)
+    liked_recipes = db.relationship('Recipes', secondary='user_recipe', backref='liking_users')
 
     def __repr__(self):
         return f'<User {self.username}>'
 
 class Recipes(db.Model):
+    __tablename__ = 'recipes'
+
     id = db.Column(db.Integer, primary_key=True)
-    title = db.Column(db.String(100), nullable=False)
+    title = db.Column(db.Text, nullable=False)
     description = db.Column(db.Text)
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+   
 
     def __repr__(self):
         return f'<Recipe {self.title}>'
-
-
-# session
-# routing
-# query db
     
-    # protecting routes 
-    # redirect 
+
+def connect_db(app):
+
+    db.app = app
+    db.init_app(app)
+
+
+
+
 

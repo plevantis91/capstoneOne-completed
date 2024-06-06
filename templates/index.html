@@ -1,11 +1,10 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Welcome</title>
-    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
-</head>
+<!-- index.html -->
+
+{% extends 'base.html' %}
+
+{% block title %}Index Page{% endblock %}
+
+{% block content %}
 <body class="bg-light">
     <div class="container py-5">
         <h1 class="text-center mb-4">Welcome to our Food Random Generator</h1>
@@ -21,4 +20,4 @@
         </div>
     </div>
 </body>
-</html>
+{% endblock %}
