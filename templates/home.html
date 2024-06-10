@@ -9,43 +9,42 @@
             <h1>Welcome, {{ username }}</h1>
             <p>Explore recipes and enjoy!</p>
         </div>
-        <h1>Liked Recipes</h1>
+        
     <table id="recipesTable" class="table table-striped table-bordered">
         <thead class="thead dark">
             <tr>
-                <th>Title</th>
-                <th>Description</th>
-                <th>Image</th>
-                <th>Actions</th>
+                <th>Favorite Recipes</th>
+                <th>Delete</th>
             </tr>
         </thead>
         <tbody>
-            <!-- Rows will be inserted here by JavaScript -->
+           {% for recipe in liked_recipes%}
+               <tr>
+                    <td><a href="{{ url_for('recipe_details', recipe_id=recipe.id) }}">{{ recipe.title }}</a></td>
+                    <td>
+                       <button type="button" class="btn btn-danger delete-btn" recipe-id="{{recipe.id}}">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash" viewBox="0 0 16 16">
+                            <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0z"/>
+                            <path d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4zM2.5 3h11V2h-11z"/>
+                          </svg>
+                    </button>
+
+                    </td>
+               </tr>
+           {% endfor %}
         </tbody>
     </table>
+    
+    
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-    axios.get('/liked_recipes')
-        .then(response => {
-            const recipes = response.data;
-            const tableBody = document.getElementById('recipesTable').querySelector('tbody');
-            
-            recipes.forEach(recipe => {
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td>${recipe.title}</td>
-                    <td>${recipe.description || ''}</td>
-                    <td><img src="${recipe.image || ''}" alt="${recipe.title}" style="max-width: 100px;"></td>
-                    <td><button class="delete-btn" data-id="${recipe.id}">Delete</button></td>
-                `;
-                tableBody.appendChild(row);
-            });
-
+    
             // Add event listeners to delete buttons
             document.querySelectorAll('.delete-btn').forEach(button => {
                 button.addEventListener('click', function() {
-                    const recipeId = this.getAttribute('data-id');
+                    const recipeId = this.getAttribute('recipe-id');
+                    console.log(recipeId)
                     axios.post('/delete_recipe', { id: recipeId })
                         .then(response => {
                             if (response.data.success) {
@@ -63,7 +62,7 @@
         .catch(error => {
             console.error('Error fetching liked recipes:', error);
         });
-});
+
 
     </script>
 

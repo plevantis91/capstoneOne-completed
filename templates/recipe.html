@@ -36,17 +36,14 @@
             </ol>
     
         </div>
-            <!-- Link to Refresh Random Recipe -->
-        <form method="GET" action="{{ url_for('refresh_recipe') }}">
-            <button type="submit" id="refreshButton" class="btn btn-primary mt-3">New Recipe</button>
-            <button type="submit" id="save-btn" class="btn btn-primary mt-3">Like</button>
-         </form>
+            
+            <button type="submit" id="save-btn" class="btn btn-primary mt-3">Save Recipe</button>
+        
     </div>
     <script>
         const recipeData = {
             id: "{{ recipe.id }}",
             title: "{{ recipe.title }}",
-            image: "{{ recipe.image }}",
             description: "{{ recipe.summary }}"
         };
         

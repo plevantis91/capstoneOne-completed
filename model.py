@@ -2,12 +2,12 @@ from flask_sqlalchemy import SQLAlchemy
 
 db = SQLAlchemy()
 
-class User_recipe(db.Model):
-    __tablename__ = 'user_recipe'
+class UserRecipe(db.Model):
+    __tablename__ = 'user_recipes'
     
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
     recipe_id = db.Column(db.Integer, db.ForeignKey('recipes.id'), primary_key=True) 
-class Users(db.Model):
+class User(db.Model):
     __tablename__ = 'users'
 
     id = db.Column(db.Integer, primary_key=True)
@@ -15,12 +15,12 @@ class Users(db.Model):
     password = db.Column(db.String(100), nullable=False)
     
     # Define relationship with Recipe table
-    liked_recipes = db.relationship('Recipes', secondary='user_recipe', backref='liking_users')
+    liked_recipes = db.relationship('Recipe', secondary='user_recipes', backref='users')
 
     def __repr__(self):
         return f'<User {self.username}>'
 
-class Recipes(db.Model):
+class Recipe(db.Model):
     __tablename__ = 'recipes'
 
     id = db.Column(db.Integer, primary_key=True)
