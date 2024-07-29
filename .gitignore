@@ -1,0 +1,30 @@
+# Virtual environment
+venv/
+env/
+
+# Python cache files
+*.pyc
+*.pyo
+__pycache__/
+
+# Flask instance folder
+instance/
+
+# Configuration files
+*.env
+
+# Log files
+*.log
+
+# SQL database files
+*.db
+
+# MacOS Finder metadata
+.DS_Store
+
+# IDE/editor specific files
+.vscode/
+.idea/
+
+# OS-specific files
+Thumbs.db

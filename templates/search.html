@@ -5,45 +5,38 @@
 {% block title %}Search Recipes - My App{% endblock %}
 
 {% block content %}
-<body>
     <div class="container mt-5">
         <h2>Search Recipes</h2>
-
+         {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+              {% for category, message in messages %}
+                <div class="alert alert-{{ category }}" role="alert">
+                    {{ message }}
+                </div>
+              {% endfor %}
+            {% endif %}
+        {% endwith %}
         <!-- Search Form -->
-        <form method="POST" action="{{ url_for('search') }}">
-            <div class="form-group">
-                <label for="query">Enter your recipe query:</label>
-                <input type="text" class="form-control" id="query" name="query" placeholder="E.g., pasta, chicken, salad...">
-            </div>
-            <div class="form-group">
-                <label for="cuisine">Cuisine:</label>
-                <select class="form-control" id="cuisine" name="cuisine">
-                    <option value="">Select cuisine...</option>
-                    {% for cuisine in cuisines %}
-                        <option value="{{cuisine}}">{{cuisine}}</option>
-                    {% endfor %}
-                </select>
-            </div>
-            <div class="form-group">
-                <label for="diet">Diet:</label>
-                <select class="form-control" id="diet" name="diet">
-                    <option value="">Select diet...</option>
-                    {% for diet in diets %}
-                        <option value="{{diet}}">{{diet}}</option>
-                    {% endfor %}
-                </select>
-            </div>
-            <div class="form-group">
-                <label for="intolerance">Allergies:</label>
-                <select class="form-control" id="intolerance" name="intolerance">
-                    <option value="">Select intolerance...</option>
-                    {% for intolerance in intolerances %}
-                        <option value="{{intolerance}}">{{intolerance}}</option>
-                    {% endfor %}
-                </select>
-            </div>
-            <button type="submit" class="btn btn-primary">Search</button>
-        </form>
+       <form method="POST" action="{{ url_for('search') }}">
+    {{ form.hidden_tag() }}
+    <div class="form-group">
+        {{ form.query.label }}
+        {{ form.query(class="form-control") }}
+    </div>
+    <div class="form-group">
+        {{ form.cuisine.label }}
+        {{ form.cuisine(class="form-control") }}
+    </div>
+    <div class="form-group">
+        {{ form.diet.label }}
+        {{ form.diet(class="form-control") }}
+    </div>
+    <div class="form-group">
+        {{ form.intolerance.label }}
+        {{ form.intolerance(class="form-control") }}
+    </div>
+    <button type="submit" class="btn btn-primary">Search</button>
+</form>
 
         <!-- Display Search Results -->
         {% if recipes %}
@@ -62,5 +55,4 @@
         <!-- Link to Home Page -->
         <p class="mt-4"><a href="{{ url_for('home_page') }}">Back to Home</a></p>
     </div>
-</body>
 {% endblock %}
